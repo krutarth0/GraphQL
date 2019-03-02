@@ -1,16 +1,17 @@
+
 const express = require('express');
 const graphqlHTTP = require('express-graphql');
 const schema = require('./schema/schema');
 const mongoose = require('mongoose');
-const cors = require('cors')
+const cors = require('cors');
 
 const app = express();
 
-//allow cross-origin request
+// allow cross-origin requests
 app.use(cors());
 // connect to mlab database
-// make sure to replace my db string & creds with your own
-mongoose.connect('mongodb://react:react123@cluster0-shard-00-00-qlwi9.mongodb.net:27017,cluster0-shard-00-01-qlwi9.mongodb.net:27017,cluster0-shard-00-02-qlwi9.mongodb.net:27017/test?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin&retryWrites=true', {useNewUrlParser: true})
+// make sure to replace  db string with creds
+mongoose.connect('mongodb+srv://react:react123@cluster0-qlwi9.mongodb.net/test?retryWrites=true',{  useNewUrlParser: 'true'})
 mongoose.connection.once('open', () => {
     console.log('conneted to database');
 });
@@ -22,7 +23,5 @@ app.use('/graphql', graphqlHTTP({
 }));
 
 app.listen(4000, () => {
-    console.log('now listening for requests on port 4000 !!');
-
-
+    console.log('now listening for requests on port 4000');
 });

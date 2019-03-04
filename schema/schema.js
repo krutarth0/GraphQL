@@ -20,6 +20,14 @@ const transformResponse = (items) => items.map(items=>(
 })
 );
 
+const transformResponseID = (items) =>
+  ({
+      id : items.id,
+      name : items.volumeInfo.title,
+      genre : items.volumeInfo.categories,
+      author : items.volumeInfo.authors
+});
+
 const BookType = new GraphQLObjectType({
 
     name: 'Book',
@@ -48,6 +56,19 @@ const RootQuery = new GraphQLObjectType({
 
                 )
             }
+        },
+        book:{
+          type:BookType,
+          args:{
+            id:{type:GraphQLID}
+          },
+          resolve(parent,args){
+            return(
+            axios.get(`https://www.googleapis.com/books/v1/volumes/${args.id}`)
+            .then(res =>transformResponseID(res.data))
+          )
+        }
+
         }
     }
 });

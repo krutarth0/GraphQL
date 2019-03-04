@@ -16,7 +16,8 @@ const transformResponse = (items) => items.map(items=>(
       id : items.id,
       name : items.volumeInfo.title,
       genre : items.volumeInfo.categories,
-      author : items.volumeInfo.authors
+      author : items.volumeInfo.authors,
+      description: items.volumeInfo.description
 })
 );
 
@@ -25,7 +26,9 @@ const transformResponseID = (items) =>
       id : items.id,
       name : items.volumeInfo.title,
       genre : items.volumeInfo.categories,
-      author : items.volumeInfo.authors
+      author : items.volumeInfo.authors,
+      description: items.volumeInfo.description
+
 });
 
 const BookType = new GraphQLObjectType({
@@ -35,7 +38,8 @@ const BookType = new GraphQLObjectType({
         id: { type: GraphQLID },
         name: { type: GraphQLString },
         genre:  {type : new GraphQLList(GraphQLString)},
-        author: {type : new GraphQLList(GraphQLString)}
+        author: {type : new GraphQLList(GraphQLString)},
+        description:{type : GraphQLString }
     })
 });
 

@@ -34,8 +34,8 @@ const transformResponseID = (items) =>
 });
 
 const transformXml = (result) =>({
-      id : result.GoodreadsResponse.author[0].$.id,
-      name : result.GoodreadsResponse.author[0].name
+      id : result[0].$.id,
+      name : result[0].name
 });
 
 const transformXmlB = (book) => book.map(book=>//console.log(book);
@@ -94,7 +94,7 @@ const RootQuery = new GraphQLObjectType({
                 },
             resolve(parent, args){
                 return (
-                  axios.get(`https://www.googleapis.com/books/v1/volumes?q=${args.search}&maxResults=${args.howmany}`)
+                  axios.get(`https://www.googleapis.com/books/v1/volumes?q=intitle:${args.search}&maxResults=${args.howmany}&printType=books&orderBy=relevance`)
                   // .then(res=>console.log(res.data.items.map(items=>items.volumeInfo)))
                   .then(res =>transformResponse(res.data.items))
                 )
@@ -127,7 +127,7 @@ const RootQuery = new GraphQLObjectType({
               parseString(res.data, function (err, result) {
                 resp=result
                 })
-              return transformXml(resp);
+              return transformXml(resp.GoodreadsResponse.author);
           })
         )
       }

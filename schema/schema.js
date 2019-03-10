@@ -23,7 +23,7 @@ const transformBooks = (items) => items.map(items=>(
     author : items.volumeInfo.authors,
     language:items.volumeInfo.language,
     pageCount:items.volumeInfo.pageCount,
-    textSnippet:items.searchInfo.textSnippet,
+    textSnippet: items.searchInfo!==undefined ? (items.searchInfo.textSnippet).toString() : " null ",
     description: items.volumeInfo.description,
     maturityRating:items.volumeInfo.maturityRating,
 })
@@ -38,7 +38,7 @@ const transformBook = (items) =>
       author : items.volumeInfo.authors,
       language:items.volumeInfo.language,
       pageCount:items.volumeInfo.pageCount,
-      textSnippet:items.searchInfo.textSnippet,
+      textSnippet: items.searchInfo!==undefined ? (items.searchInfo.textSnippet).toString() : " null ",
       description: items.volumeInfo.description,
       maturityRating:items.volumeInfo.maturityRating,
 

@@ -1,6 +1,11 @@
 const graphql = require('graphql');
 const axios = require('axios');
 const parseString = require('xml2js').parseString;
+const Post = require('../models/Posts')
+const Comment = require('../models/comment')
+
+
+
 
 const {
     GraphQLObjectType,
@@ -51,6 +56,42 @@ const transformAuthor = (items) =>
        name : items[0].volumeInfo.authors[0],
        genre: [...new Set( items.map(items=> items.volumeInfo.categories!==undefined ? (items.volumeInfo.categories).toString() : " ") )]
  })
+
+ const transformPosts = (result) =>result.map(result=>
+
+    ({
+      id :result._id,
+      title:result.title,
+      by:result.by,
+      content:result.content,
+      datePosted:result.datePosted,
+      suggestions:result.suggestions,
+  })
+)
+
+const PostsType = new GraphQLObjectType({
+  name:'Posts',
+  fields:()=>({
+    _id :{type:GraphQLID},
+    title:{ type: GraphQLString },
+    by:{ type: GraphQLString },
+    content:{ type: GraphQLString },
+    datePosted:{ type: GraphQLString },
+    suggestions:{type:GraphQLInt},
+  })
+
+});
+
+const CommentsType = new GraphQLObjectType({
+  name:'Comments',
+  fields:()=>({
+    _id:{ type: GraphQLID },
+    pid :{ type: GraphQLID },
+    by:{ type: GraphQLString },
+    message:{ type: GraphQLString },
+    datePosted:{ type: GraphQLString },
+  })
+});
 
 const BookType = new GraphQLObjectType({
 
@@ -129,11 +170,70 @@ const RootQuery = new GraphQLObjectType({
           .then(res =>transformAuthor(res.data.items))
         )
       }
+    },
+
+    posts:{
+      type:PostsType,
+      args:{
+        title:{type:GraphQLString}
+      },
+      resolve(parent,args){
+
+            var query= Post.find({})
+            
+
+      }
     }
-  }
+
+}
 });
 
+const Mutation = new GraphQLObjectType({
+      name:"Mutation",
+      fields:{
+        addPost:{
+          type:PostsType,
+          args:{
+            title:{ type: GraphQLString },
+            by:{ type: GraphQLString },
+            content:{ type: GraphQLString },
+            datePosted:{ type: GraphQLString },
+            suggestions:{type:GraphQLInt}
+          },
+          resolve(parent,args){
+            var post = Post({
+
+              title:args.title,
+              by:args.by,
+              content:args.content,
+              datePosted:args.datePosted,
+              suggestions:args.suggestions
+            });
+            return post.save();
+
+          }
+        },
+
+        addComment:{
+          type:CommentsType,
+          args:{
+            pid:{ type: GraphQLID },
+            by:{ type: GraphQLString },
+            message:{ type: GraphQLString }
+          },
+          resolve(parent,args){
+            let comment = new Comment({
+              pid:args.pid,
+              by:args.by,
+              message:args.message
+            })
+            return comment.save()
+          }
+        }
+      }
+})
 
 module.exports = new GraphQLSchema({
-    query: RootQuery
+    query: RootQuery,
+    mutation:Mutation
 });

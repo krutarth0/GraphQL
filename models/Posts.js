@@ -1,14 +1,14 @@
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema;
 
-const PostSchema = new Schema({
+const postSchema = new Schema({
 
   title:String,
   by:String,
   content:String,
-  datePosted:String,
-  suggestions:Number
+  datePosted:{ type: Date, default: Date.now },
+  suggestions:Number,
+  searchTokens:[String]
+});
 
-})
-
-module.exports = mongoose.model('Post',PostSchema);
+module.exports = mongoose.model('Post',postSchema);

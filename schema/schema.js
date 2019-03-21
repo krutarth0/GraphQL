@@ -1,11 +1,11 @@
 const graphql = require('graphql');
+const graphqlDate = require('graphql-iso-date')
 const axios = require('axios');
 const parseString = require('xml2js').parseString;
 const Post = require('../models/Posts')
 const Comment = require('../models/comment')
 
-
-
+const {  GraphQLDateTime} = graphqlDate;
 
 const {
     GraphQLObjectType,
@@ -70,26 +70,32 @@ const transformAuthor = (items) =>
 )
 
 const PostsType = new GraphQLObjectType({
-  name:'Posts',
+  name:'Post',
   fields:()=>({
-    _id :{type:GraphQLID},
+    id:{ type: GraphQLString },
     title:{ type: GraphQLString },
     by:{ type: GraphQLString },
     content:{ type: GraphQLString },
-    datePosted:{ type: GraphQLString },
+    datePosted:{ type:  GraphQLDateTime },
     suggestions:{type:GraphQLInt},
+    searchTokens:{type:new GraphQLList(GraphQLString)},
+    comments:{
+      type:new GraphQLList(CommentsType),
+      resolve(parent, args){
+            return Comment.find({pid:parent.id});
+        }
+    }
   })
 
 });
 
 const CommentsType = new GraphQLObjectType({
-  name:'Comments',
+  name:'Comment',
   fields:()=>({
-    _id:{ type: GraphQLID },
-    pid :{ type: GraphQLID },
+    pid:{ type: GraphQLString },
     by:{ type: GraphQLString },
     message:{ type: GraphQLString },
-    datePosted:{ type: GraphQLString },
+    datePosted:{ type:  GraphQLDateTime }
   })
 });
 
@@ -173,19 +179,19 @@ const RootQuery = new GraphQLObjectType({
     },
 
     posts:{
-      type:PostsType,
-      args:{
-        title:{type:GraphQLString}
-      },
-      resolve(parent,args){
-
-            var query= Post.find({})
-            
-
-      }
+      type:new GraphQLList(PostsType),
+      resolve(parent, args){
+            return Post.find({});
+        }
+    },
+    comments:{
+      type:new GraphQLList(CommentsType),
+      resolve(parent, args){
+            return Comment.find({});
+        }
     }
+  }
 
-}
 });
 
 const Mutation = new GraphQLObjectType({
@@ -197,9 +203,9 @@ const Mutation = new GraphQLObjectType({
             title:{ type: GraphQLString },
             by:{ type: GraphQLString },
             content:{ type: GraphQLString },
-            datePosted:{ type: GraphQLString },
-            suggestions:{type:GraphQLInt}
-          },
+            suggestions:{type:GraphQLInt},
+            searchTokens:{type : new GraphQLList(GraphQLString)}
+            },
           resolve(parent,args){
             var post = Post({
 
@@ -207,7 +213,8 @@ const Mutation = new GraphQLObjectType({
               by:args.by,
               content:args.content,
               datePosted:args.datePosted,
-              suggestions:args.suggestions
+              suggestions:args.suggestions,
+              searchTokens:args.searchTokens
             });
             return post.save();
 
@@ -217,7 +224,7 @@ const Mutation = new GraphQLObjectType({
         addComment:{
           type:CommentsType,
           args:{
-            pid:{ type: GraphQLID },
+            pid:{ type: GraphQLString },
             by:{ type: GraphQLString },
             message:{ type: GraphQLString }
           },
@@ -226,7 +233,7 @@ const Mutation = new GraphQLObjectType({
               pid:args.pid,
               by:args.by,
               message:args.message
-            })
+            });
             return comment.save()
           }
         }
